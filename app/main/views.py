@@ -1,9 +1,6 @@
-from ast import Not
 from datetime import datetime
-import imp
 from flask import render_template, session, redirect, url_for, flash, abort, request, current_app, make_response
 from flask_login import login_required, current_user
-from numpy import require
 from . import main
 from .forms import EditProfileForm, NameForm, PostForm
 from .. import db
@@ -18,7 +15,8 @@ def index():
     
     if request.method == 'POST' and request.files['choose-img'] is not None:
         id = picData.addPicture(current_user.id)
-        filename = os.path.dirname(__file__)[0:-4] + 'static\\save\\' + str(id) + '.png'
+        base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        filename = os.path.join(base_path, 'static', 'save', str(id) + '.png')
         print(filename)
         img = request.files['choose-img']
         img.save(filename)
