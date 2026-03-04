@@ -1,9 +1,6 @@
-from ast import Not
 from datetime import datetime
-import imp
 from flask import render_template, session, redirect, url_for, flash, abort, request, current_app, make_response
 from flask_login import login_required, current_user
-from numpy import require
 from . import main
 from .forms import EditProfileForm, NameForm, PostForm
 from .. import db
@@ -18,7 +15,8 @@ def index():
     
     if request.method == 'POST' and request.files['choose-img'] is not None:
         id = picData.addPicture(current_user.id)
-        filename = os.path.dirname(__file__)[0:-4] + 'static\\save\\' + str(id) + '.png'
+        base_path = os.path.dirname(os.path.dirname(__file__))
+        filename = os.path.join(base_path, 'static', 'save', str(id) + '.png')
         print(filename)
         img = request.files['choose-img']
         img.save(filename)
@@ -45,7 +43,7 @@ def index():
     else:
         query = Post.query
     pagination = query.order_by(Post.timestamp.desc()).paginate(
-        page, per_page=current_app.config['HAMBLOGER_POSTS_PER_PAGE'],
+        page=page, per_page=current_app.config['HAMBLOGER_POSTS_PER_PAGE'],
         error_out=False)
     posts = pagination.items
     edit_post = Post.query.order_by(Post.id.desc()).first()
@@ -109,7 +107,7 @@ def new(id):
     if current_user.is_authenticated:
         show_followed = bool(request.cookies.get('show_followed', ''))
     pagination = Post.query.order_by(Post.timestamp.desc()).paginate(
-        page, per_page=current_app.config['HAMBLOGER_POSTS_PER_PAGE'],
+        page=page, per_page=current_app.config['HAMBLOGER_POSTS_PER_PAGE'],
         error_out=False)
     posts = pagination.items
     edit_post = Post.query.order_by(Post.id.desc()).first()
@@ -151,7 +149,7 @@ def user(username):
     edit_post = Post.query.order_by(Post.id.desc()).first()
     page = request.args.get('page', 1, type=int)
     pagination = user.posts.order_by(Post.timestamp.desc()).paginate(
-        page, per_page=current_app.config['HAMBLOGER_POSTS_PER_PAGE'],
+        page=page, per_page=current_app.config['HAMBLOGER_POSTS_PER_PAGE'],
         error_out=False)
     global user_star_list
     if not user_star_list:
@@ -183,7 +181,8 @@ def edit_profile():
         f = form.mask.data
         filename = (str(current_user.id) + '.png')
         if (f is not None):
-            f.save(os.path.join('app/static/mask/',filename))
+            base_path = os.path.dirname(os.path.dirname(__file__))
+            f.save(os.path.join(base_path, 'static', 'mask', filename))
         current_user.name = form.name.data
         current_user.location = form.location.data
         current_user.about_me = form.about_me.data
@@ -243,7 +242,7 @@ def followers(username):
         return redirect(url_for('.index'))
     page = request.args.get('page', 1, type=int)
     pagination = user.followers.paginate(
-        page, per_page=current_app.config['HAMBLOGER_FOLLOWERS_PER_PAGE'],
+        page=page, per_page=current_app.config['HAMBLOGER_FOLLOWERS_PER_PAGE'],
         error_out=False)
     follows = [{'user': item.follower, 'timestamp': item.timestamp}
                for item in pagination.items]
@@ -262,7 +261,7 @@ def followed_by(username):
         return redirect(url_for('.index'))
     page = request.args.get('page', 1, type=int)
     pagination = user.followed.paginate(
-        page, per_page=current_app.config['HAMBLOGER_FOLLOWERS_PER_PAGE'],
+        page=page, per_page=current_app.config['HAMBLOGER_FOLLOWERS_PER_PAGE'],
         error_out=False)
     follows = [{'user': item.followed, 'timestamp': item.timestamp}
                for item in pagination.items]
