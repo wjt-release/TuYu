@@ -8,9 +8,17 @@ import functools
 from sqlalchemy import false
 
 def judge(img1, img2):
-    p1 = cv2.imread(os.path.dirname(__file__)[0:-4] + 'static\\save\\' + str(img1) + '.png')
+    base_path = os.path.dirname(os.path.dirname(__file__))
+    p1_path = os.path.join(base_path, 'static', 'save', str(img1) + '.png')
+    p1 = cv2.imread(p1_path)
+    if p1 is None:
+        return 0 # 或者处理错误
     p1 = cv2.resize(p1,[256,256])
-    p2 = cv2.imread(os.path.dirname(__file__)[0:-4] + 'static\\save\\' + str(img2) + '.png')
+    
+    p2_path = os.path.join(base_path, 'static', 'save', str(img2) + '.png')
+    p2 = cv2.imread(p2_path)
+    if p2 is None:
+        return 0
     p2 = cv2.resize(p2,[256,256])
     h1 = cv2.calcHist([p1], [2], None, [256], [0,256])
     h2 = cv2.calcHist([p2], [2], None, [256], [0,256])
